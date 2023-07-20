@@ -1,0 +1,1 @@
+export { default } from "file:///home/joakim/code/weather/node_modules/@nuxt/vite-builder/dist/runtime/client.manifest.mjs"

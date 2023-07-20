@@ -1,0 +1,69 @@
+<template>
+  <div class="container">
+    <slot></slot>
+  </div>
+</template>
+
+<style>
+*,
+:before,
+:after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: #e5e7eb;
+}
+
+html,
+body {
+  --bittersweet: #ed6a5a;
+  --lemon-chiffon: #f4f1bb;
+  --ash-gray: #9bc1bc;
+  --wenge: #5d576b;
+  --alabaster: #e6ebe0;
+
+  background: radial-gradient(
+      circle at 100% 100%,
+      var(--lemon-chiffon) 0%,
+      var(--ash-gray) 100%
+    )
+    var(--alabaster);
+
+  font-family: monospace;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  font-size: 16px;
+}
+
+.container {
+  margin-right: auto;
+  margin-left: auto;
+  width: 100%;
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+</style>
