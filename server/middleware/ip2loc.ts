@@ -42,11 +42,6 @@ type IpLookupResponse = {
 };
 
 export default defineEventHandler(async (event) => {
-  console.log("New request");
-  // for (const entry of Object.entries(event.node.req)) {
-  //   console.log(entry);
-  // }
-
   const ip = getIp(event);
   if (!ip) {
     console.log("No IP found");

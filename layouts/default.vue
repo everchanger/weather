@@ -14,6 +14,16 @@
   border-color: #e5e7eb;
 }
 
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+
 html,
 body {
   --bittersweet: #ed6a5a;

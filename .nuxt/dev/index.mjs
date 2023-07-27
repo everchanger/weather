@@ -660,7 +660,6 @@ const getIp = (event) => {
   }
 };
 const _ScFX5J = defineEventHandler(async (event) => {
-  console.log("New request");
   const ip = getIp(event);
   if (!ip) {
     console.log("No IP found");

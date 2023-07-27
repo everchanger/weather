@@ -1,10 +1,31 @@
 <template>
   <div class="hello">
-    <h2>{{ city }}</h2>
-    <div class="flex">
-      <p>{{ weather?.current_weather?.temperature }} °C</p>
-      <img :src="icon" class="icon" />
-      {{ weather?.current_weather }}
+    <div class="current flex flex-col">
+      <h2>{{ city }}</h2>
+      <p class="temperature">{{ weather.current_weather.temperature }}°C</p>
+      <p class="windspeed">{{ windSpeedMs }} m/s</p>
+      <div class="flex items-center">
+        <img
+          alt="An icon showing the current weather"
+          :src="icon"
+          class="icon"
+        />
+        <div class="flex flex-col">
+          <img
+            alt="An icon showing the current Beauford scale value"
+            :src="windIcon"
+            class="icon wind"
+          />
+          <p class="text-xs text-center">
+            Animation shows
+            <a
+              title="Read more about the Beauford scale"
+              href="https://en.wikipedia.org/wiki/Beaufort_scale"
+              >Beaufortscale</a
+            >
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -15,7 +36,24 @@ type Location = {
   longitude: number;
 };
 
-const weather = ref(null);
+type Weather = {
+  current_weather: {
+    temperature: number;
+    windspeed: number;
+    winddirection: number;
+    weathercode: number;
+    is_day: number;
+    time: string;
+  };
+  elevation: number;
+  generationtime_ms: number;
+  latitude: number;
+  longitude: number;
+  timezone: string;
+  timezone_abbreviation: string;
+  utc_offset_seconds: number;
+};
+
 const location = useLocation();
 const getWeather = ({ latitude, longitude }: Location) =>
   $fetch(
@@ -27,35 +65,35 @@ const getCity = ({ latitude, longitude }: Location) =>
     `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
   );
 
-const weatherPromise = await useAsyncData(
+const { data: weather }: { data: Ref<Weather> } = await useAsyncData(
   "weather",
   () => getWeather(location.value),
-  { watch: location },
+  { watch: [location] },
 );
-
-// How do we handle this?
-weather.value = weatherPromise.data.value;
 
 const { data: city } = await useAsyncData(
   "city",
   () => getCity(location.value),
   {
-    transform: (data) => data.display_name.split(",").slice(0, 2).join(", "),
-    watch: location,
+    transform: (data: any) =>
+      data.display_name.split(",").slice(0, 2).join(", "),
+    watch: [location],
   },
 );
 
+const windSpeedMs = computed(() =>
+  (weather.value.current_weather.windspeed * (5 / 18)).toFixed(1),
+);
+
 const icon = computed(() => {
-  const code = weather?.value?.current_weather?.weatchercode;
-  console.log("calculating", { code });
+  const code = weather.value.current_weather.weathercode;
   switch (code) {
     case 0:
       // Clear sky
-      return "/icons/line/sun.svg";
+      return "/icons/line/clear-day.svg";
     case 1:
     case 2:
     case 3:
-      console.log("here");
       // Mainly clear, partly cloudy, and overcast
       return "/icons/line/cloudy.svg";
     case 45:
@@ -112,10 +150,40 @@ const icon = computed(() => {
   return "/icons/line/cloudy.svg";
 });
 
+const beaufort = computed(() => {
+  const scale = {
+    "0": 1,
+    "1": 6,
+    "2": 12,
+    "3": 20,
+    "4": 29,
+    "5": 39,
+    "6": 50,
+    "7": 62,
+    "8": 75,
+    "9": 89,
+    "10": 103,
+    "11": 119,
+    "12": 221,
+  };
+
+  const windspeed = weather.value.current_weather.windspeed;
+  for (const [key, value] of Object.entries(scale)) {
+    if (windspeed < value) {
+      return key;
+    }
+  }
+  return "0";
+});
+
+const windIcon = computed(
+  () => `/icons/line/wind-beaufort-${beaufort.value}.svg`,
+);
+
 onMounted(() => {
-  // navigator.geolocation.getCurrentPosition((pos) => {
-  //   location.value = pos.coords;
-  // });
+  navigator.geolocation.getCurrentPosition((pos) => {
+    location.value = pos.coords;
+  });
 });
 </script>
 ```
@@ -131,15 +199,52 @@ onMounted(() => {
 h2 {
   font-size: 2rem;
   font-weight: normal;
-  margin: 0;
 }
 .icon {
+  border-radius: 50%;
+  align-self: center;
   width: 12rem;
   height: 12rem;
-  margin: 0.5rem 0;
+}
+
+.wind {
+  width: 6rem;
+  height: 6rem;
+  margin: 0;
 }
 
 .flex {
   display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.current {
+  gap: 0.5rem;
+}
+
+.current .temperature {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.current .windspeed {
+  font-size: 1.5rem;
+  font-weight: normal;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+  font-weight: normal;
+}
+
+.text-center {
+  text-align: center;
 }
 </style>
