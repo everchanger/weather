@@ -31,11 +31,6 @@
 </template>
 
 <script lang="ts" setup>
-type Location = {
-  latitude: number;
-  longitude: number;
-};
-
 type Weather = {
   current_weather: {
     temperature: number;
@@ -54,26 +49,34 @@ type Weather = {
   utc_offset_seconds: number;
 };
 
-const location = useLocation();
-const getWeather = ({ latitude, longitude }: Location) =>
-  $fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`,
-  );
+const defaultLocation = {
+  latitude: 59.3294,
+  longitude: 18.0687,
+};
 
-const getCity = ({ latitude, longitude }: Location) =>
-  $fetch(
-    `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
-  );
+const location = useCookie("location", {
+  default: () => defaultLocation,
+});
+
+if (!location.value.latitude || !location.value.longitude) {
+  location.value = defaultLocation;
+}
 
 const { data: weather }: { data: Ref<Weather> } = await useAsyncData(
   "weather",
-  () => getWeather(location.value),
+  () =>
+    $fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${location.value.latitude}&longitude=${location.value.longitude}&current_weather=true`,
+    ),
   { watch: [location] },
 );
 
 const { data: city } = await useAsyncData(
   "city",
-  () => getCity(location.value),
+  () =>
+    $fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${location.value.latitude}&lon=${location.value.longitude}&format=json`,
+    ),
   {
     transform: (data: any) =>
       data.display_name.split(",").slice(0, 2).join(", "),
@@ -146,7 +149,6 @@ const icon = computed(() => {
       // Thunderstorm with slight and heavy hail
       return "/icons/line/thunderstorm.svg";
   }
-  console.log("no weather code");
   return "/icons/line/cloudy.svg";
 });
 
@@ -182,7 +184,8 @@ const windIcon = computed(
 
 onMounted(() => {
   navigator.geolocation.getCurrentPosition((pos) => {
-    location.value = pos.coords;
+    const { latitude, longitude } = pos.coords;
+    location.value = { latitude, longitude };
   });
 });
 </script>
