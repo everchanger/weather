@@ -1,5 +1,5 @@
 <template>
-  <div class="hello">
+  <div class="hello" :class="timeOfDay === 'day' ? 'day' : 'night'">
     <div class="current flex flex-col">
       <h2>{{ city }}</h2>
       <p class="temperature">{{ weather.current_weather.temperature }}°C</p>
@@ -88,68 +88,74 @@ const windSpeedMs = computed(() =>
   (weather.value.current_weather.windspeed * (5 / 18)).toFixed(1),
 );
 
+const timeOfDay = computed(() =>
+  weather.value.current_weather.is_day ? "day" : "night",
+);
+
 const icon = computed(() => {
   const code = weather.value.current_weather.weathercode;
   switch (code) {
     case 0:
-      // Clear sky
-      return "/icons/line/clear-day.svg";
     case 1:
+      // Clear sky
+      return `/icons/line/clear-${timeOfDay.value}.svg`;
     case 2:
+      return `/icons/line/partly-cloudy-${timeOfDay.value}.svg`;
     case 3:
-      // Mainly clear, partly cloudy, and overcast
-      return "/icons/line/cloudy.svg";
+      return `/icons/line/overcast-${timeOfDay.value}.svg`;
     case 45:
     case 48:
       // Fog
-      return "/icons/line/fog.svg";
+      return `/icons/line/fog-${timeOfDay.value}.svg`;
     case 51:
+      return `/icons/line/partly-cloudy-${timeOfDay.value}-drizzle.svg`;
     case 53:
+      return `/icons/line/overcast-${timeOfDay.value}-drizzle.svg`;
     case 55:
       // Drizzle: Light, moderate, and dense intensity
-      return "/icons/line/rain.svg";
+      return `/icons/line/extreme-${timeOfDay.value}-drizzle.svg`;
     case 56:
+      return `/icons/line/overcast-${timeOfDay.value}-sleet.svg`;
     case 57:
-    case 58:
-      // Freezing Drizzle: Light and dense intensity
-      return "/icons/line/rain.svg";
+      return `/icons/line/extreme-${timeOfDay.value}-sleet.svg`;
     case 61:
+      return `/icons/line/partly-cloudy-${timeOfDay.value}-rain.svg`;
     case 63:
+      return `/icons/line/overcast-${timeOfDay.value}-rain.svg`;
     case 65:
-      // Rain: Slight, moderate and heavy intensity
-      return "/icons/line/rain.svg";
+      return `/icons/line/extreme-${timeOfDay.value}-rain.svg`;
     case 66:
+      return `/icons/line/overcast-${timeOfDay.value}-sleet.svg`;
     case 67:
-    case 68:
-      // Freezing Rain: Light and heavy intensity
-      return "/icons/line/rain.svg";
+      return `/icons/line/extreme-${timeOfDay.value}-sleet.svg`;
     case 71:
+      return `/icons/line/partly-cloudy-${timeOfDay.value}-snow.svg`;
     case 73:
+      return `/icons/line/overcast-${timeOfDay.value}-snow.svg`;
     case 75:
-      // Snow fall: Slight, moderate, and heavy intensity
-      return "/icons/line/snow.svg";
+      return `/icons/line/extreme-${timeOfDay.value}-snow.svg`;
     case 77:
-    case 78:
       // Snow grains: Light and heavy intensity
-      return "/icons/line/snow.svg";
+      return `/icons/line/snow.svg`;
     case 80:
+      return `/icons/line/partly-cloudy-${timeOfDay.value}-rain.svg`;
     case 81:
+      return `/icons/line/overcast-${timeOfDay.value}-rain.svg`;
     case 82:
-      // Rain showers: Slight, moderate and volent
-      return "/icons/line/rain.svg";
+      return `/icons/line/extreme-${timeOfDay.value}-rain.svg`;
     case 85:
+      return `/icons/line/partly-cloudy-${timeOfDay.value}-snow.svg`;
     case 86:
-      // Snow showers slight and heavy
-      return "/icons/line/snow.svg";
+      return `/icons/line/extreme-${timeOfDay.value}-snow.svg`;
     case 95:
       // Thunderstorm: Slight or moderate
-      return "/icons/line/thunderstorm.svg";
+      return `/icons/line/thunderstorms-${timeOfDay.value}.svg`;
     case 96:
     case 99:
       // Thunderstorm with slight and heavy hail
-      return "/icons/line/thunderstorm.svg";
+      return `/icons/line/thunderstorms-${timeOfDay.value}.svg`;
   }
-  return "/icons/line/cloudy.svg";
+  return `/icons/line/not-available.svg`;
 });
 
 const beaufort = computed(() => {
@@ -194,7 +200,6 @@ onMounted(() => {
 <style scoped>
 .hello {
   padding: 1rem;
-  color: var(--wenge);
   font-size: 1rem;
   font-weight: bold;
 }

@@ -32,18 +32,29 @@ body {
   --wenge: #5d576b;
   --alabaster: #e6ebe0;
 
-  background: radial-gradient(
-      circle at 100% 100%,
-      var(--lemon-chiffon) 0%,
-      var(--ash-gray) 100%
-    )
-    var(--alabaster);
-
   font-family: monospace;
   height: 100%;
   min-height: 100%;
   margin: 0;
   font-size: 16px;
+}
+
+body {
+  background: radial-gradient(
+    circle at 100% 100%,
+    var(--lemon-chiffon) 0%,
+    var(--ash-gray) 100%
+  );
+  color: var(--wenge);
+}
+
+body:has(.night) {
+  background: radial-gradient(
+    circle at 100% 100%,
+    var(--wenge) 0%,
+    var(--bittersweet) 100%
+  );
+  color: var(--lemon-chiffon);
 }
 
 .container {
