@@ -1,18 +1,23 @@
 <template>
   <div class="hello" :class="timeOfDay === 'day' ? 'day' : 'night'">
+    <!-- <pre>{{ weather }}</pre> -->
     <div class="current flex flex-col">
       <h2>{{ city }}</h2>
       <p class="temperature">{{ weather.current_weather.temperature }}°C</p>
       <p class="windspeed">{{ windSpeedMs }} m/s</p>
+      <div class="sun">
+        <div>
+          <img alt="sunrise icon" src="/icons/line/sunrise.svg" />{{ sunrise }}
+        </div>
+        <div>
+          <img alt="sunset icon" src="/icons/line/sunset.svg" />{{ sunset }}
+        </div>
+      </div>
       <div class="flex items-center">
-        <img
-          alt="An icon showing the current weather"
-          :src="icon"
-          class="icon"
-        />
+        <img alt="current weather icon" :src="icon" class="icon" />
         <div class="flex flex-col">
           <img
-            alt="An icon showing the current Beauford scale value"
+            alt="current Beauford scale value icon"
             :src="windIcon"
             class="icon wind"
           />
@@ -40,6 +45,11 @@ type Weather = {
     is_day: number;
     time: string;
   };
+  daily: {
+    time: string[];
+    sunrise: string[];
+    sunset: string[];
+  };
   elevation: number;
   generationtime_ms: number;
   latitude: number;
@@ -66,7 +76,7 @@ const { data: weather }: { data: Ref<Weather> } = await useAsyncData(
   "weather",
   () =>
     $fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${location.value.latitude}&longitude=${location.value.longitude}&current_weather=true`,
+      `https://api.open-meteo.com/v1/forecast?latitude=${location.value.latitude}&longitude=${location.value.longitude}&timezone=auto&current_weather=true&daily=sunrise,sunset`,
     ),
   { watch: [location] },
 );
@@ -91,6 +101,26 @@ const windSpeedMs = computed(() =>
 const timeOfDay = computed(() =>
   weather.value.current_weather.is_day ? "day" : "night",
 );
+
+const currentDate = computed(() => {
+  return new Date().toISOString().slice(0, 10);
+});
+
+const sunrise = computed(() => {
+  const currentIndex = weather.value.daily.time.findIndex(
+    (date) => date === currentDate.value,
+  );
+  if (currentIndex === -1) return;
+  return weather.value.daily.sunrise[currentIndex].slice(-5);
+});
+
+const sunset = computed(() => {
+  const currentIndex = weather.value.daily.time.findIndex(
+    (date) => date === currentDate.value,
+  );
+  if (currentIndex === -1) return;
+  return weather.value.daily.sunset[currentIndex].slice(-5);
+});
 
 const icon = computed(() => {
   const code = weather.value.current_weather.weathercode;
@@ -208,6 +238,31 @@ h2 {
   font-size: 2rem;
   font-weight: normal;
 }
+
+.sun {
+  border-radius: 0.15rem;
+  display: flex;
+  justify-content: start;
+  align-self: flex-start;
+  margin-top: 1rem;
+}
+
+.sun > div {
+  display: flex;
+  align-items: center;
+}
+
+.sun > div:first-child {
+  margin-right: 1.5rem;
+}
+
+.sun img {
+  width: 3rem;
+  background-color: var(--alabaster);
+  border-radius: 100%;
+  margin-right: 1rem;
+}
+
 .icon {
   border-radius: 50%;
   align-self: center;
